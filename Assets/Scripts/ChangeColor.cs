@@ -6,16 +6,12 @@ using Random = UnityEngine.Random;
 
 public class ChangeColor : MonoBehaviour
 {
+   [SerializeField] private float _pauseDuration = 2f;
+   [SerializeField] float _recoloringDuration = 2f;
    private Color _nextColor;
-   private Color _currentColor;
    private Color _startColor;
    private float _recoloringTime;
    private float _pauseTimeBetweenRecoloring;
-   private bool _canChangeColor=true;
-   
-   [SerializeField] private float _pauseDuration = 2f;
-   
-   [SerializeField] float recoloringDuration = 2f;
    private Renderer _renderer;
    private void Awake()
    {
@@ -32,30 +28,23 @@ public class ChangeColor : MonoBehaviour
       _nextColor = Random.ColorHSV(0f, 1f, 0.8f, 1f,1f,1f);
     
    }
-   private void Update()
-   {
-      _recoloringTime += Time.deltaTime;
-      _pauseTimeBetweenRecoloring += Time.deltaTime;
-      
-      if (_canChangeColor)
+   
+      private void Update()
       {
-         var progress = _recoloringTime / recoloringDuration;
-      
-         _currentColor=Color.Lerp(_startColor, _nextColor,progress);
-         _renderer.material.color = _currentColor;
-      }
-      if (_recoloringTime>= recoloringDuration)
-      {
-         _recoloringTime = 0f;
-         _canChangeColor = false;
-      }
-      if (_pauseTimeBetweenRecoloring >= _pauseDuration+recoloringDuration)
-      {
-         _recoloringTime = 0f;
-         _pauseTimeBetweenRecoloring = 0f;
-         _canChangeColor = true;
-         GenerateColor();
-      }
+         _pauseTimeBetweenRecoloring += Time.deltaTime;
+         if (_pauseTimeBetweenRecoloring <= _pauseDuration)
+         {
+            return;
+         }
+         _recoloringTime += Time.deltaTime;
+         var progress = _recoloringTime/_recoloringDuration;
+         _renderer.material.color = Color.Lerp(_startColor, _nextColor, progress);
+         if (_recoloringTime > _recoloringDuration)
+         {
+            _pauseTimeBetweenRecoloring = 0;
+            _recoloringTime = 0;
+            GenerateColor();
+         }
    }
    
 }
